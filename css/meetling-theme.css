@@ -29,8 +29,9 @@ body {
   padding: 18px 24px;
   display: flex;
   align-items: center;
-  background: #102f40;
-  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  background: linear-gradient(135deg, #fff 0%, #f2fbf9 100%);
+  border-bottom: 1px solid #d9ebe8;
+  box-shadow: 0 4px 18px rgba(20, 70, 69, .07);
 }
 
 .brand-logo { display: block; width: auto; height: 29px; object-fit: contain; }
@@ -42,15 +43,16 @@ body {
   padding: 0;
   display: grid;
   place-items: center;
-  color: #fff;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, .12);
+  color: var(--meetling-purple-dark);
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid #d4e5e3;
   border-radius: 9px;
-  transition: background-color 160ms ease, transform 160ms ease;
+  box-shadow: 0 2px 7px rgba(27, 80, 77, .05);
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .icon-button svg, .meetling-button svg, .intro-icon svg, .search-field svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.icon-button:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, .24); transform: translateY(-1px); }
+.icon-button:hover { color: var(--meetling-mint-dark); background: #e7f7f4; border-color: #a8d8d1; box-shadow: 0 5px 12px rgba(27, 80, 77, .1); transform: translateY(-1px); }
 .icon-button:focus-visible, .meetling-button:focus-visible, input:focus-visible { outline: 3px solid rgba(41, 181, 161, 0.32); outline-offset: 2px; }
 .notification-button { display: none; }
 
