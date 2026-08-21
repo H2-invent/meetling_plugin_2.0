@@ -1,3 +1,5 @@
+import { openConferenceWindow } from './js/openConferenceWindow.js';
+
 const params = new URLSearchParams(window.location.search);
 const message = params.get("message");
 const title = params.get("title");
@@ -16,9 +18,7 @@ let autoCloseTimeout = setTimeout(() => {
 }, 40000);
 
 joinButton.addEventListener("click", () => {
-  chrome.tabs.create({ url: href }, () => {
-      window.close();
-  });
+  openConferenceWindow(href, () => window.close());
 });
 
 muteButton.addEventListener("click", () => {

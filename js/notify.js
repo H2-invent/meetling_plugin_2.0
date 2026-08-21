@@ -1,3 +1,5 @@
+import { openConferenceWindow } from './openConferenceWindow.js';
+
 export function setNotification(value) {
   chrome.storage.local.set({ meetlingAddonNotification: value }, () => {
     console.log("✅ meetlingAddonNotification gesetzt auf:", value);
@@ -35,7 +37,7 @@ export function showMeetlingNotification(message, fullUrl, title, notificationId
 
   chrome.notifications.onClicked.addListener((clickedId) => {
     if (clickedId === notificationId) {
-      chrome.tabs.create({ url: fullUrl });
+      openConferenceWindow(fullUrl);
       chrome.notifications.clear(clickedId);
     }
   });

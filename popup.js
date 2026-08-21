@@ -2,6 +2,7 @@ import { getConfig } from './js/getConfig.js';
 import { getNotification } from './js/notify.js';
 import { contactState, renderContactsList } from './js/renderContacts.js';
 import { checkLoginStatusAndStoreContacts, loadContacts } from './js/contactList.js';
+import { openConferenceWindow } from './js/openConferenceWindow.js';
 
 let meetlingAddonBaseUrl = null;
 let meetlingAddonServerId = null;
@@ -73,13 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
         if (data && Array.isArray(data.popups) && data.popups.length > 0) {
           const popupUrl = data.popups[0].url;
-  
-          // 🛡️ Nur absolute URLs verwenden
-          if (popupUrl.startsWith("http")) {
-            chrome.tabs.create({ url: popupUrl });
-          } else {
-            chrome.tabs.create({ url: `${meetlingAddonBaseUrl}${popupUrl}` });
-          }
+          const conferenceUrl = new URL(popupUrl, meetlingAddonBaseUrl);
+          openConferenceWindow(conferenceUrl.href);
         } else {
           alert("Keine Konferenz-URL in der Antwort gefunden.");
           console.warn("Fehlende oder ungültige popups:", data);
@@ -154,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const randomSuffix = Math.random().toString(36).substring(2, 8);
         const roomName = `raum-${randomSuffix}`;
         const meetingUrl = `${meetlingAddonBaseUrl}/m/${roomName}`;
-        chrome.tabs.create({ url: meetingUrl });
+        openConferenceWindow(meetingUrl);
       } else {
     // Sofort-Konferenz API aufrufen
     fetch(`${meetlingAddonBaseUrl}/room/create/fast/confernce`, {
@@ -169,13 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Überprüfen, ob eine URL im JSON vorhanden ist
         if (data && Array.isArray(data.popups) && data.popups.length > 0) {
           const popupUrl = data.popups[0].url;
-
-          // Nur absolute URLs verwenden
-          if (popupUrl.startsWith("http")) {
-            chrome.tabs.create({ url: popupUrl });
-          } else {
-            chrome.tabs.create({ url: `${meetlingAddonBaseUrl}${popupUrl}` });
-          }
+          const conferenceUrl = new URL(popupUrl, meetlingAddonBaseUrl);
+          openConferenceWindow(conferenceUrl.href);
         } else {
           alert("Fehler: Keine Konferenz-URL gefunden.");
         }
