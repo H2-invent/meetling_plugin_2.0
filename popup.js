@@ -14,18 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const configBtn = document.getElementById("configBtn");
   const disableNotificationBtn = document.getElementById("disableNotificationBtn");
   const enableNotificationBtn = document.getElementById("enableNotificationBtn");
-  const contactSearch = document.getElementById("contactSearch")
+  const contactSearch = document.getElementById("contactSearch");
+  const startBtn = document.getElementById("startBtn");
+  const loadingOverlay = document.getElementById("loadingOverlay");
 
   const manifest = chrome.runtime.getManifest();
   const isDev = !manifest.update_url;
   const dev = document.getElementById('dev');
   if (dev) {
-    if (isDev) {
-      dev.textContent = ' DEV ';
-      dev.style.display = 'inline'; // oder 'block', je nachdem was du brauchst
-    } else {
-      dev.style.display = 'none'; // vollständig ausblenden
-    }
+    dev.hidden = !isDev;
   }
 
   getConfig().then(({ meetlingAddonBaseUrl: baseUrl, meetlingAddonServerId: serverId, source }) => {

@@ -66,8 +66,8 @@ export function renderContactsList(contacts, skipCache = false) {
 
       const startBtn = document.getElementById("startBtn");
       startBtn.classList.remove("disabled");
+      startBtn.disabled = false;
       startBtn.textContent = `${contactState.selectedContactName} anrufen`;
     });
   });
 }
-
