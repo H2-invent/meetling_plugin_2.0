@@ -17,8 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactSearch = document.getElementById("contactSearch");
   const startBtn = document.getElementById("startBtn");
   const loadingOverlay = document.getElementById("loadingOverlay");
+  const appVersion = document.getElementById("appVersion");
 
   const manifest = chrome.runtime.getManifest();
+  appVersion.textContent = manifest.version;
   const isDev = !manifest.update_url;
   const dev = document.getElementById('dev');
   if (dev) {

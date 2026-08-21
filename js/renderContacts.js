@@ -13,6 +13,14 @@ export function renderContactsList(contacts, skipCache = false) {
   const contactList = document.getElementById("contactList");
   contactList.innerHTML = "";
 
+  if (contacts.length === 0) {
+    const emptyState = document.createElement("li");
+    emptyState.className = "contact-empty-state";
+    emptyState.textContent = "Keine Kontakte gefunden";
+    contactList.appendChild(emptyState);
+    return;
+  }
+
   const statusPriority = {
     meeting: 3,
     away: 2,
