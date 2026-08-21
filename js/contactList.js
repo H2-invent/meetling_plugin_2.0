@@ -27,7 +27,7 @@ export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback)
                 status: statusMap.get(newContact.uid) || false
               }));
 
-              chrome.storage.local.set({ contacts: mergedContacts }, () => {
+              chrome.storage.local.set({ contacts: mergedContacts, isLoggedIn: true }, () => {
                 console.log("✅ Kontakte gespeichert & gemerged.");
                 if (typeof callback === "function") {
                   callback();
@@ -38,32 +38,40 @@ export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback)
             });
           } else {
             console.warn("⚠️ JSON enthält keine 'contacts'-Eigenschaft:", data);
-            chrome.storage.local.set({ contacts: [] });
+            chrome.storage.local.set({ contacts: [], isLoggedIn: false });
           }
         } catch (err) {
           console.log("⚠️ Kein Login erkannt.");
-          chrome.storage.local.set({ contacts: [] });
+          chrome.storage.local.set({ contacts: [], isLoggedIn: false });
         }
       });
     }
   })
   .catch(err => {
     console.log("⚠️ Logout oder kein Login erkannt");
-    chrome.storage.local.set({ contacts: [] });
+    chrome.storage.local.set({ contacts: [], isLoggedIn: false });
   });
 }
 
 export function loadContacts() {
-  chrome.storage.local.get("contacts", (result) => {
-    const contacts = result.contacts;
+  chrome.storage.local.get(["contacts", "isLoggedIn"], (result) => {
+    const contacts = Array.isArray(result.contacts) ? result.contacts : [];
     console.log("Kontakte geladen:", contacts);
 
-    if (Array.isArray(contacts) && contacts.length > 0) {
+    const contactSection = document.getElementById("contactSection");
+    const dashboardBtn = document.getElementById("dashboardBtn");
+    const loggedInSection = document.getElementById("logged_in");
+    const loginBtn = document.getElementById("loginBtn");
+
+    if (result.isLoggedIn) {
       renderContactsList(contacts);
-      contactSection.style.display = "block";
+      contactSection.classList.remove("hidden");
       dashboardBtn.style.display = "block";
-      logged_in.style.display = "block";
+      loggedInSection.style.display = "block";
+      loginBtn.style.display = "none";
     } else {
+      contactSection.classList.add("hidden");
+      loggedInSection.style.display = "none";
       loginBtn.style.display = "block";
     }
   });

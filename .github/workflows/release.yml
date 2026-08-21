@@ -14,35 +14,58 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Read and validate extension version
+      - name: Generate extension version
         id: version
         shell: bash
         run: |
-          version="$(jq -er '.version' manifest.json)"
-          if [[ ! "$version" =~ ^[0-9]+(\.[0-9]+){0,3}$ ]]; then
-            echo "Invalid Chrome extension version: $version" >&2
+          base_version="$(jq -er '.version' manifest.json)"
+          IFS=. read -r major minor _ <<< "$base_version"
+          version="${major}.${minor}.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+
+          if [[ ! "$version" =~ ^[0-9]+(\.[0-9]+){3}$ ]]; then
+            echo "Invalid generated Chrome extension version: $version" >&2
             exit 1
           fi
+
+          for component in ${version//./ }; do
+            if (( component > 65535 )); then
+              echo "Version component exceeds Chrome's limit: $component" >&2
+              exit 1
+            fi
+          done
+
+          jq --arg version "$version" '.version = $version' manifest.json > manifest.tmp.json
+          mv manifest.tmp.json manifest.json
           echo "number=$version" >> "$GITHUB_OUTPUT"
           echo "archive=meetling-plugin-$version.zip" >> "$GITHUB_OUTPUT"
 
-      - name: Create installable ZIP
+      - name: Prepare extension package
         shell: bash
         run: |
-          mkdir -p dist
+          mkdir -p dist/package
           git ls-files -z \
             ':!.github/**' \
             ':!dist/**' \
             ':!.gitignore' \
-            | xargs -0 zip -9 "dist/${{ steps.version.outputs.archive }}"
-          unzip -t "dist/${{ steps.version.outputs.archive }}"
-          unzip -Z1 "dist/${{ steps.version.outputs.archive }}" | grep -qx 'manifest.json'
+            | while IFS= read -r -d '' file; do
+                mkdir -p "dist/package/$(dirname "$file")"
+                cp "$file" "dist/package/$file"
+              done
+          cp manifest.json dist/package/manifest.json
+
+      - name: Create release ZIP
+        shell: bash
+        working-directory: dist/package
+        run: |
+          zip -9 -r "../${{ steps.version.outputs.archive }}" .
+          unzip -t "../${{ steps.version.outputs.archive }}"
+          unzip -Z1 "../${{ steps.version.outputs.archive }}" | grep -qx 'manifest.json'
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: meetling-plugin-${{ steps.version.outputs.number }}
-          path: dist/${{ steps.version.outputs.archive }}
+          path: dist/package/
           if-no-files-found: error
 
       - name: Create GitHub release
@@ -52,7 +75,7 @@ jobs:
           tag_name: v${{ steps.version.outputs.number }}-build.${{ github.run_number }}
           name: Meetling Plugin v${{ steps.version.outputs.number }} (Build ${{ github.run_number }})
           body: |
-            Automatisch erstelltes Release für Version `${{ steps.version.outputs.number }}`.
+            Automatisch erstelltes Release für die individuelle Build-Version `${{ steps.version.outputs.number }}`.
 
             Die ZIP-Datei enthält das Plugin direkt auf der obersten Ebene und kann nach dem Entpacken unmittelbar über „Entpackte Erweiterung laden“ installiert werden.
           files: dist/${{ steps.version.outputs.archive }}
