@@ -2,8 +2,6 @@ name: Build and release extension
 
 on:
   push:
-    branches:
-      - master
   workflow_dispatch:
 
 permissions:
@@ -48,6 +46,7 @@ jobs:
           if-no-files-found: error
 
       - name: Create GitHub release
+        if: github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.number }}-build.${{ github.run_number }}
