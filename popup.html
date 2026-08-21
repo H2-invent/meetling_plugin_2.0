@@ -1,248 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Meetling Konferenz</title>
-
-  <!-- Bootstrap 5 -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    body {
-      background-color: #ffffff;
-      color: #000000;
-      width: 350px;
-      font-family: 'Roboto', sans-serif;
-      position: relative;
-    }
-
-    .form-select {
-      color: #000000;
-      background: transparent;
-    }
-
-    .form-floating .form-select {
-      padding-top: unset;
-      padding-bottom: unset;
-    }
-
-    .form-floating .form-select option {
-      padding-top: unset;
-      padding-bottom: unset;
-      color: #000000;
-    }
-
-    .icon-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .icon-buttons button {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background-color 0.2s ease;
-    }
-
-    .icon-buttons button:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    #pageHeader {
-      background-color: #dddddd;
-      padding: 12px;
-      height: 50px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #loginBtn, #logged_in {
-      display: none;
-    }
-
-    .headerBtn {
-      position: absolute;
-      top: 10px;
-      background: transparent;
-      border: none;
-      font-size: 22px;
-      cursor: pointer;
-      color: #f8f9fa;
-      z-index: 10;
-    }
-
-    .notificationBtn {
-      right: 10px;
-    }
-
-    #configBtn {
-      right: 40px;
-    }
-
-    #dashboardBtn {
-      right: 70px;
-    }
-
-    #dev {
-      position: absolute;
-      top: 5px;
-      left: 100px;
-      background-color: red;
-      padding: 2px;
-      padding-left: 10px;
-      padding-right: 10px;
-      font-size: 10px;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      opacity: 0.85;
-    }
-
-    .contact-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 200px;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .contact-item {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
-
-    .contact-item:hover {
-      background-color: #f8f8f8;
-    }
-
-    .contact-item.selected {
-      background-color: #d0f0c0;
-      color: #2c662d;
-      border-radius: 4px;
-    }
-
-    .contact-name {
-      flex-grow: 1;
-      display: inline-block;  /* damit max-width wirkt */
-      white-space: nowrap;    /* keine Zeilenumbrüche */
-      overflow: hidden;       /* Text, der nicht passt, ausblenden */
-      text-overflow: ellipsis;/* '...' anzeigen */
-      vertical-align: middle; /* optional für bessere Ausrichtung */
-    }
-
-    .status-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-left: 8px;
-      display: inline-block;
-    }
-
-    .meetling-primary {
-      background-color: #29b5a1
-    }
-    .meetling-primary:hover {
-      background-color: #6ae6d3
-    }
-
-    .meetling-secondary {
-      background-color: #a050af
-    }
-    .meetling-secondary:hover {
-      background-color: #c56dd4
-    }
-
-    .status-meeting {
-      background-color: #0158b0;
-    }
-    .status-away {
-      background-color: #f9a825;
-    }
-    .status-online {
-      background-color: #00b047;
-    }
-    .status-offline {
-      background-color: gray;
-    }
-
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6); /* halbtransparent */
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .loading-spinner {
-      text-align: center;
-      color: white;
-    }
-  </style>
+  <link href="css/meetling-theme.css" rel="stylesheet">
 </head>
+<body class="popup-page">
+  <header id="pageHeader" class="app-header">
+    <img class="brand-logo" src="images/app_meetling_de_logo.png" alt="Meetling">
+    <span id="dev" class="environment-badge" hidden>DEV</span>
+    <nav class="header-actions" aria-label="Schnellzugriff">
+      <button id="dashboardBtn" class="icon-button" type="button" title="Dashboard öffnen" aria-label="Dashboard öffnen">
+        <span aria-hidden="true">⌂</span>
+      </button>
+      <button id="configBtn" class="icon-button" type="button" title="Einstellungen öffnen" aria-label="Einstellungen öffnen">
+        <span aria-hidden="true">⚙</span>
+      </button>
+      <button id="disableNotificationBtn" class="icon-button notification-button" type="button" title="Benachrichtigungen aktivieren" aria-label="Benachrichtigungen aktivieren">
+        <span aria-hidden="true">◌</span>
+      </button>
+      <button id="enableNotificationBtn" class="icon-button notification-button" type="button" title="Benachrichtigungen deaktivieren" aria-label="Benachrichtigungen deaktivieren">
+        <span aria-hidden="true">●</span>
+      </button>
+    </nav>
+  </header>
 
-<body>
+  <main class="app-content">
+    <section class="intro" aria-labelledby="popup-title">
+      <span class="eyebrow">Sicher. Einfach. Verbunden.</span>
+      <h1 id="popup-title">Wen möchtest du treffen?</h1>
+      <p>Starte deine Videokonferenz direkt aus dem Browser.</p>
+    </section>
 
-  <!-- Dunklerer Header -->
-  <div id="pageHeader">
-    <img style="height: 30px;" src="./images/app_meetling_de_logo.png">
-    <p id="dev" style="display: none;"></p>
-    <button id="dashboardBtn" class="headerBtn" title="Dashboard">🏠</button>
-    <button id="configBtn" class="headerBtn" title="Settings">⚙️</button>
-    <button id="disableNotificationBtn" title="Toggle Notification" class="headerBtn notificationBtn">🔕</button>
-    <button id="enableNotificationBtn" title="Toggle Notification" class="headerBtn notificationBtn">🔔</button>
-  </div>
-
-  <div class="m-4">
-    <button id="loginBtn" class="btn rounded-pill meetling-primary w-100 mb-3">
-      <i class="bi bi-person"></i> Login
+    <button id="loginBtn" class="meetling-button meetling-button--primary w-100 mb-3" type="button">
+      Bei Meetling anmelden
     </button>
 
     <div id="logged_in">
-      <div id="contactSection" class="hidden">
-        <div class="form-floating mb-3">
-          <div class="input-group mb-3">
-            <input id="contactSearch" type="text" class="form-control pt-2 pb-2" placeholder="Kontakt suchen..." aria-label="Username" aria-describedby="basic-addon1">
-          </div>
-          <ul id="contactList" class="contact-list"></ul>
+      <section id="contactSection" class="hidden" aria-label="Kontakte">
+        <label class="visually-hidden" for="contactSearch">Kontakt suchen</label>
+        <div class="search-field">
+          <span aria-hidden="true">⌕</span>
+          <input id="contactSearch" type="search" placeholder="Kontakt suchen …" autocomplete="off">
         </div>
-      </div>
+        <ul id="contactList" class="contact-list" aria-label="Kontaktliste"></ul>
+      </section>
 
-      <button id="startBtn" class="btn rounded-pill meetling-primary w-100 disabled">
+      <button id="startBtn" class="meetling-button meetling-button--primary w-100 disabled" type="button" disabled>
         Kontakt auswählen
       </button>
     </div>
 
-    <button id="instantBtn" class="btn rounded-pill meetling-secondary w-100 mt-2">
+    <div class="divider"><span>oder</span></div>
+
+    <button id="instantBtn" class="meetling-button meetling-button--secondary w-100" type="button">
       Sofortkonferenz starten
     </button>
-  </div>
-  <div id="loadingOverlay" class="loading-overlay d-none">
-    <div class="loading-spinner text-center">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Lädt...</span>
-      </div>
-      <div class="mt-2 text-white">Wir bereiten alles vor...</div>
+  </main>
+
+  <footer class="app-footer">
+    <span class="secure-dot" aria-hidden="true"></span>
+    Bereit für deine nächste Begegnung
+  </footer>
+
+  <div id="loadingOverlay" class="loading-overlay d-none" role="status" aria-live="polite">
+    <div class="loading-card">
+      <div class="spinner-border" aria-hidden="true"></div>
+      <strong>Konferenz wird vorbereitet</strong>
+      <span>Einen kleinen Moment bitte …</span>
     </div>
   </div>
-  <!-- Bootstrap Icons & Scripts -->
-  <script src="./js/bootstrap.bundle.min.js"></script>
+
+  <script src="js/bootstrap.bundle.min.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
