@@ -58,6 +58,7 @@ export function loadContacts() {
     const contacts = Array.isArray(result.contacts) ? result.contacts : [];
     console.log("Kontakte geladen:", contacts);
 
+    const introSection = document.getElementById("introSection");
     const contactSection = document.getElementById("contactSection");
     const dashboardBtn = document.getElementById("dashboardBtn");
     const loggedInSection = document.getElementById("logged_in");
@@ -65,11 +66,13 @@ export function loadContacts() {
 
     if (result.isLoggedIn) {
       renderContactsList(contacts);
+      introSection.classList.add("hidden");
       contactSection.classList.remove("hidden");
       dashboardBtn.style.display = "block";
       loggedInSection.classList.add("is-visible");
       loginBtn.classList.remove("is-visible");
     } else {
+      introSection.classList.remove("hidden");
       contactSection.classList.add("hidden");
       loggedInSection.classList.remove("is-visible");
       loginBtn.classList.add("is-visible");
