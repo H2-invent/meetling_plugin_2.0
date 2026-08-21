@@ -67,12 +67,12 @@ export function loadContacts() {
       renderContactsList(contacts);
       contactSection.classList.remove("hidden");
       dashboardBtn.style.display = "block";
-      loggedInSection.style.display = "block";
-      loginBtn.style.display = "none";
+      loggedInSection.classList.add("is-visible");
+      loginBtn.classList.remove("is-visible");
     } else {
       contactSection.classList.add("hidden");
-      loggedInSection.style.display = "none";
-      loginBtn.style.display = "block";
+      loggedInSection.classList.remove("is-visible");
+      loginBtn.classList.add("is-visible");
     }
   });
 }
