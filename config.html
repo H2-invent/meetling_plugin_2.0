@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meetling Settings</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    label, input {
+      display: block;
+      margin: 10px 0;
+      width: 100%;
+    }
+    button { margin-top: 20px; padding: 10px 20px; }
+    .policy-info {
+      background-color: #f0f4f8;
+      border-left: 4px solid #3cb5a1;
+      padding: 10px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .policy-info a {
+      color: #3cb5a1;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h2>Meetling Settings</h2>
+  <form id="configForm">
+    <label>
+      Meetling Base URL:
+      <input type="url" id="meetlingAddonBaseUrl" required placeholder="https://app.meetling.de" />
+    </label>
+    <label>
+      Meetling Server ID:
+      <input type="text" id="meetlingAddonServerId" required placeholder="2" />
+    </label>
+    <div id="button">
+      <button class="btn rounded-pill btn-success" type="submit">Save</button>
+      <button class="btn rounded-pill btn-outline-danger"id="resetButton">Reset</button>
+    </div>
+  </form>
+  <div class="policy-info">
+    <p>
+      This extension can also be configured using enterprise-managed policies.<br>
+      For more information, please visit our 
+      <a href="https://meetling.de/tutorials/chrome-addon-einrichten/" target="_blank" rel="noopener noreferrer">documentation page</a>.
+    </p>
+  </div>
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+</body>
+</html>

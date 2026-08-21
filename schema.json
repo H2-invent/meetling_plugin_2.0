@@ -1,0 +1,16 @@
+{
+    "type": "object",
+    "properties": {
+      "meetlingAddonBaseUrl": {
+        "type": "string"
+      },
+      "meetlingAddonServerId": {
+        "type": "string"
+      },
+    "meetlingCheckInterval": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    }
+    }
+  }

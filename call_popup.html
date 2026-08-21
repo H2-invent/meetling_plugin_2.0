@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meetling Call</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body style="position: relative; overflow: hidden;">
+  <img src="app_meetling_de_chrome_plugin.png" 
+      alt="Meetling Logo" 
+      style="
+        position: absolute;
+        top: 50%;
+        right: -63px; 
+        transform: translateY(-50%);
+        opacity: 0.15; 
+        width: 126px; 
+        pointer-events: none; 
+        user-select: none;
+        z-index: 0;
+      " />
+  <div style="position: relative; z-index: 1; padding: 10px;"></div>
+    <h2 class="title" id="popup-title">Konferenz</h2>
+    <div class="message mb-3" id="popup-message"></div>
+      <a id="joinButton" class="btn rounded-pill btn-lg btn-success" target="_blank" rel="noopener noreferrer">Beitreten</a>
+      <a id="muteButton" class="btn rounded-pill btn-outline-danger" target="_blank" rel="noopener noreferrer">Beenden</a>
+  </div>
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script src="call_popup.js"></script>
+</body>
+</html>
