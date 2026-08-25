@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Meetling Call</title>
+  <title>Eingehender Meetling-Anruf</title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -26,12 +26,14 @@
         user-select: none;
         z-index: 0;
       " />
-  <div style="position: relative; z-index: 1; padding: 10px;"></div>
-    <h2 class="title" id="popup-title">Konferenz</h2>
-    <div class="message mb-3" id="popup-message"></div>
-      <a id="joinButton" class="btn rounded-pill btn-lg btn-success" target="_blank" rel="noopener noreferrer">Beitreten</a>
-      <a id="muteButton" class="btn rounded-pill btn-outline-danger" target="_blank" rel="noopener noreferrer">Beenden</a>
-  </div>
+  <main style="position: relative; z-index: 1; padding: 10px;" aria-live="assertive">
+    <h2 class="title" id="popup-title">Eingehender Anruf</h2>
+    <p class="message mb-3" id="popup-message">Jemand möchte eine Ad-hoc-Konferenz starten.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <button id="joinButton" type="button" class="btn rounded-pill btn-lg btn-success">Beitreten</button>
+      <button id="declineButton" type="button" class="btn rounded-pill btn-lg btn-danger">Ablehnen</button>
+    </div>
+  </main>
   <script src="./js/bootstrap.bundle.min.js"></script>
   <script type="module" src="call_popup.js"></script>
 </body>

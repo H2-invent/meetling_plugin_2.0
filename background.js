@@ -1,7 +1,8 @@
-import { setNotification, showMeetlingNotification } from './js/notify.js';
+import { setNotification } from './js/notify.js';
 import { connectBadge } from './js/chromeBadge.js';
 import { getConfig, clearConfig, openConfigPopup } from './js/getConfig.js';
 import { checkLoginStatusAndStoreContacts } from './js/contactList.js';
+import { registerWebsiteRingtoneSuppression } from './js/websiteRingtoneSuppression.js';
 
 let meetlingAddonBaseUrl = null;
 let meetlingAddonServerId = null;
@@ -14,6 +15,9 @@ getConfig().then(({ meetlingAddonBaseUrl: baseUrl, meetlingAddonServerId: server
   // Lokale globale Variablen überschreiben
   meetlingAddonBaseUrl = baseUrl;
   meetlingAddonServerId = serverId;
+  registerWebsiteRingtoneSuppression(baseUrl).catch(error => {
+    console.error('❌ Klingelton-Unterdrückung konnte nicht registriert werden:', error);
+  });
   checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl);
   chrome.alarms.create("initialCheckLoginStatus", {
     delayInMinutes: 0.5
