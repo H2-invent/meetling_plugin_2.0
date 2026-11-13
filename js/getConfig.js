@@ -1,31 +1,15 @@
 export async function getConfig() {
   return new Promise((resolve) => {
-    chrome.storage.managed.get(["meetlingAddonBaseUrl", "meetlingAddonServerId"], (managedData) => {
-      if (managedData.meetlingAddonBaseUrl && managedData.meetlingAddonServerId) {
-        resolve({
-          meetlingAddonBaseUrl: managedData.meetlingAddonBaseUrl,
-          meetlingAddonServerId: managedData.meetlingAddonServerId,
-          source: "managed"
-        });
-      } else {
-        // Kein Managed, dann local check
-        chrome.storage.local.get(["meetlingAddonBaseUrl", "meetlingAddonServerId"], (localData) => {
-          if (localData.meetlingAddonBaseUrl && localData.meetlingAddonServerId) {
-            resolve({
-              meetlingAddonBaseUrl: localData.meetlingAddonBaseUrl,
-              meetlingAddonServerId: localData.meetlingAddonServerId,
-              source: "local"
-            });
-          } else {
-            // Fallback wenn beides nicht gesetzt
-            resolve({
-              meetlingAddonBaseUrl: "https://app.meetling.de",
-              meetlingAddonServerId: 2,
-              source: "fallback"
-            });
-          }
-        });
-      }
+    chrome.storage.local.get(["meetlingAddonBaseUrl", "meetlingAddonServerId"], (localData) => {
+      chrome.storage.managed.get(["meetlingAddonBaseUrl", "meetlingAddonServerId"], (managedData) => {
+        // Vorrang je Schlüssel: local > managed > Fallback
+        const meetlingAddonBaseUrl = localData.meetlingAddonBaseUrl || managedData.meetlingAddonBaseUrl || "https://app.meetling.de";
+        const meetlingAddonServerId = localData.meetlingAddonServerId || managedData.meetlingAddonServerId || 2;
+
+        // source beschreibt, woher die Base-URL kommt (entscheidet den Login-Check)
+        const source = localData.meetlingAddonBaseUrl ? "local" : managedData.meetlingAddonBaseUrl ? "managed" : "fallback";
+        resolve({ meetlingAddonBaseUrl, meetlingAddonServerId, source });
+      });
     });
   });
 }
