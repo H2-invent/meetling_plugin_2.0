@@ -1,8 +1,9 @@
 import { io } from './socket.io.esm.js';
-import { getNotification, showMeetlingNotification, openPopup } from './notify.js';
+import { showMeetlingNotification, openPopup } from './notify.js';
 import { socket, setSocket } from './webSocketClient.js';
 import { updateBadge } from './chromeBadge.js';
 import { updateContactsOnlineStatus } from './updateContactOnlineStatus.js';
+import { suppressWebsiteRingtone } from './websiteRingtoneSuppression.js';
 
 let callReceivedRecently = false;
 let notificationTimeout = null;
@@ -36,15 +37,24 @@ export function connectWebSocket(meetlingAddonBaseUrl, websocketUrl, websocketTo
           console.log("🔕 Notification wegen Call abgebrochen");
         }
 
-        const { href } = callHref(parsed)
+        const href = getCallHref(parsed);
 
-        getNotification((isEnabled) => {
-          if (isEnabled === true) {
-            openPopup(parsed.pushMessage, meetlingAddonBaseUrl + href, "📞 Meetling Anruf", "sounds/ringtone.mp3", 0.8);
-          } else {
-            showMeetlingNotification(parsed.pushMessage, meetlingAddonBaseUrl + href, "📞 Meetling Anruf", parsed.messageId);
-          }
+        if (!href) {
+          console.warn("⚠️ Anruf ohne gültigen Konferenz-Link ignoriert.");
+          return;
+        }
+
+        suppressWebsiteRingtone(meetlingAddonBaseUrl).catch(error => {
+          console.warn("⚠️ Webseiten-Klingelton konnte nicht unterdrückt werden:", error);
         });
+
+        openPopup(
+          parsed.pushMessage || "Eingehender Ad-hoc-Anruf",
+          new URL(href, meetlingAddonBaseUrl).href,
+          "Meetling-Anruf",
+          "sounds/ringtone.mp3",
+          0.8
+        );
         setTimeout(() => {
           callReceivedRecently = false;
         }, 1500);
@@ -90,17 +100,20 @@ export function connectWebSocket(meetlingAddonBaseUrl, websocketUrl, websocketTo
 
 }
 
-function callHref(parsed) {
+function getCallHref(parsed) {
+  if (typeof parsed.href === "string" || typeof parsed.url === "string") {
+    return parsed.href || parsed.url;
+  }
+
+  if (typeof parsed.message !== "string") {
+    return null;
+  }
+
   const html = parsed.message
   .replace(/\\"/g, '"')
   .replace(/\\\//g, '/');
 
-  const match = html.match(/href="([^"]+)"/);
-  if (match && match[1]) {
-    const href = match[1];
-
-    return { href };
-  }
+  return html.match(/href=["']([^"']+)["']/i)?.[1] || null;
 }
 
 function startStillOnlinePing(socket) {

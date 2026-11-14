@@ -8,12 +8,12 @@ const sound = params.get("sound");
 const volume = parseFloat(params.get("volume"));
 
 const joinButton = document.getElementById("joinButton");
-const muteButton = document.getElementById("muteButton");
+const declineButton = document.getElementById("declineButton");
 
 if (title) document.getElementById("popup-title").textContent = title;
-if (message) document.getElementById("popup-message").innerHTML = message;
+if (message) document.getElementById("popup-message").textContent = message;
 
-let autoCloseTimeout = setTimeout(() => {
+const autoCloseTimeout = setTimeout(() => {
   window.close();
 }, 40000);
 
@@ -21,13 +21,20 @@ joinButton.addEventListener("click", () => {
   openConferenceWindow(href, () => window.close());
 });
 
-muteButton.addEventListener("click", () => {
+declineButton.addEventListener("click", () => {
   window.close();
 });
 
+let ringtone = null;
+
 if (sound) {
-    const audio = new Audio(chrome.runtime.getURL(sound));
-    audio.volume = volume;
-    audio.loop = true;
-    audio.play().catch(err => console.warn("🔇 Sound konnte nicht abgespielt werden:", err));
+    ringtone = new Audio(chrome.runtime.getURL(sound));
+    ringtone.volume = Number.isFinite(volume) ? Math.min(Math.max(volume, 0), 1) : 0.8;
+    ringtone.loop = true;
+    ringtone.play().catch(err => console.warn("🔇 Sound konnte nicht abgespielt werden:", err));
 }
+
+window.addEventListener("beforeunload", () => {
+  clearTimeout(autoCloseTimeout);
+  ringtone?.pause();
+});
