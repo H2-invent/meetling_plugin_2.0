@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         openConferenceWindow(meetingUrl);
       } else {
     // Sofort-Konferenz API aufrufen
-    fetch(`${meetlingAddonBaseUrl}/room/create/fast/confernce`, {
+    fetch(`${meetlingAddonBaseUrl}/room/create/fast/conference`, {
       method: "GET",
       credentials: "include",
       redirect: "follow"
