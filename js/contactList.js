@@ -1,19 +1,45 @@
 import { initWebSocket } from './initWebsocket.js';
 import { renderContactsList } from './renderContacts.js';
+import { socket } from './webSocketClient.js';
+import { updateBadge } from './chromeBadge.js';
+
+function handleLogout() {
+  console.log("⚠️ Logout oder kein Login erkannt");
+  chrome.storage.local.set({
+    contacts: [],
+    isLoggedIn: false,
+    websocketUrl: null,
+    websocketTopics: null
+  });
+  // Logout = no presence: disconnect socket so extension doesn't think it's online
+  // and doesn't receive calls anymore (JWT remains valid for 3 days)
+  if (socket && socket.connected) {
+    socket.disconnect();
+    updateBadge(false);
+  }
+}
 
 export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback) {
   fetch(`${meetlingAddonBaseUrl}/room/contact/api`, {
     method: "GET",
     credentials: "include",
-    redirect: "follow"
+    redirect: "manual"
   })
   .then(response => {
-    if (response.status === 200) {
-      response.text().then(text => {
-        try {
-          const data = JSON.parse(text);
+    // 302 to login-page = session gone (logout)
+    if (response.type === "opaqueredirect") {
+      handleLogout();
+      return;
+    }
+    // Transient server errors (5xx, etc): keep state and socket, next poll will check again
+    if (response.status !== 200) {
+      return;
+    }
+    response.text().then(text => {
+      try {
+        const data = JSON.parse(text);
 
-          if (Array.isArray(data.contacts)) {
+        if (Array.isArray(data.contacts)) {
             // Vorherige Kontakte holen
             chrome.storage.local.get("contacts", (result) => {
               const existingContacts = result.contacts || [];
@@ -27,7 +53,12 @@ export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback)
                 status: statusMap.get(newContact.uid) || false
               }));
 
-              chrome.storage.local.set({ contacts: mergedContacts, isLoggedIn: true }, () => {
+              chrome.storage.local.set({
+                contacts: mergedContacts,
+                isLoggedIn: true,
+                websocketUrl: data.websocketUrl,
+                websocketTopics: data.websocketTopics
+              }, () => {
                 console.log("✅ Kontakte gespeichert & gemerged.");
                 if (typeof callback === "function") {
                   callback();
@@ -38,18 +69,17 @@ export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback)
             });
           } else {
             console.warn("⚠️ JSON enthält keine 'contacts'-Eigenschaft:", data);
-            chrome.storage.local.set({ contacts: [], isLoggedIn: false });
+            handleLogout();
           }
         } catch (err) {
-          console.log("⚠️ Kein Login erkannt.");
-          chrome.storage.local.set({ contacts: [], isLoggedIn: false });
+          // 200 with non-json body (login page) -> not logged in
+          handleLogout();
         }
       });
-    }
   })
   .catch(err => {
-    console.log("⚠️ Logout oder kein Login erkannt");
-    chrome.storage.local.set({ contacts: [], isLoggedIn: false });
+    // Transient network error: keep state and socket, next poll will check again
+    console.log("⚠️ Netzwerkfehler beim Login-Check:", err);
   });
 }
 
