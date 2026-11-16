@@ -19,6 +19,10 @@ export function connectWebSocket(meetlingAddonBaseUrl, websocketUrl, websocketTo
   ws.on("connect", () => {
     console.log("✅ Verbunden mit dem Server");
     updateBadge(true);
+    // Same as web-client: register explicitly as being online, so that presence
+    // remains valid even if saved status is 0 (offline) and signifies 'online'
+    ws.emit("setStatus", "online");
+    console.log("📡 setStatus online gesendet");
     startStillOnlinePing(socket);
   });
 
