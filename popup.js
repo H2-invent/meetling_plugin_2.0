@@ -6,6 +6,7 @@ import { openConferenceWindow } from './js/openConferenceWindow.js';
 
 let meetlingAddonBaseUrl = null;
 let meetlingAddonServerId = null;
+let canCall = true; // false when the account has no usable server (set by refreshCallAvailability)
 
 document.addEventListener("DOMContentLoaded", () => {
   const contactSection = document.getElementById("contactSection");
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const loadingOverlay = document.getElementById("loadingOverlay");
   const appVersion = document.getElementById("appVersion");
+  const callWarning = document.getElementById("callWarning");
 
   const manifest = chrome.runtime.getManifest();
   appVersion.textContent = manifest.version;
@@ -26,6 +28,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const dev = document.getElementById('dev');
   if (dev) {
     dev.hidden = !isDev;
+  }
+
+  // A call needs a server assigned to the account: the ad-hoc endpoint rejects callers
+  // without one (silent redirectUrl response). The login check stores the caller's
+  // servers from /room/contact/api, so use those and warn in the popup instead.
+  function refreshCallAvailability() {
+    chrome.storage.local.get(["servers"], (result) => {
+      const servers = Array.isArray(result.servers) ? result.servers : [];
+      let message = "";
+
+      if (servers.length === 0) {
+        message = "Kein Server für dein Konto hinterlegt. Ein Administrator muss dir einen Server zuweisen, bevor du Anrufe starten kannst.";
+      } else if (meetlingAddonServerId && !servers.some(s => String(s.id) === String(meetlingAddonServerId))) {
+        message = `Der konfigurierte Server (ID ${meetlingAddonServerId}) ist deinem Konto nicht zugewiesen. Bitte die Server-ID in den Einstellungen prüfen.`;
+      }
+
+      canCall = message === "";
+      contactState.canCall = canCall;
+      callWarning.textContent = message;
+      callWarning.classList.toggle("d-none", canCall);
+
+      if (!canCall) {
+        startBtn.disabled = true;
+        startBtn.classList.add("disabled");
+      }
+    });
   }
 
   getConfig().then(({ meetlingAddonBaseUrl: baseUrl, meetlingAddonServerId: serverId, source }) => {
@@ -36,8 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Lokale globale Variablen überschreiben
     meetlingAddonBaseUrl = baseUrl;
     meetlingAddonServerId = serverId;
+    refreshCallAvailability();
     console.log("Popup - Start Login Check after opening Popup");
-    checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, loadContacts)
+    checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, () => {
+      loadContacts();
+      refreshCallAvailability();
+    });
   });
 
   function toggleNotificationDisplay() {
@@ -70,12 +102,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
       .then(data => {
-        console.log("Antwort von der Konferenz-API:", data);
+        console.log("Antwort von der Konferenz-API:", JSON.stringify(data));
   
         if (data && Array.isArray(data.popups) && data.popups.length > 0) {
           const popupUrl = data.popups[0].url;
           const conferenceUrl = new URL(popupUrl, meetlingAddonBaseUrl);
           openConferenceWindow(conferenceUrl.href);
+        } else if (data && data.error) {
+          // The backend knows why (e.g. callee offline) — show that instead of the
+          // generic message so silent guard failures are not a mystery.
+          alert(data.error);
+        } else if (data && data.redirectUrl) {
+          alert("Der Anruf konnte nicht gestartet werden. Bitte prüfe die Server-Zuweisung und die Einstellungen.");
         } else {
           alert("Keine Konferenz-URL in der Antwort gefunden.");
           console.warn("Fehlende oder ungültige popups:", data);
@@ -103,6 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   startBtn.addEventListener("click", () => {
+    if (!canCall) {
+      alert(callWarning.textContent || "Anrufe sind derzeit nicht möglich.");
+      return;
+    }
     if (contactState.selectedContactId) {
       loadingOverlay.classList.remove("d-none");
       startConference(contactState.selectedContactId)
@@ -153,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
         openConferenceWindow(meetingUrl);
       } else {
     // Sofort-Konferenz API aufrufen
-    fetch(`${meetlingAddonBaseUrl}/room/create/fast/confernce`, {
+    fetch(`${meetlingAddonBaseUrl}/room/create/fast/conference`, {
       method: "GET",
       credentials: "include",
       redirect: "follow"
@@ -179,5 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
   loadContacts();
+  refreshCallAvailability();
   toggleNotificationDisplay();
 });
