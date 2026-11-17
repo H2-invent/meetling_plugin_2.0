@@ -9,7 +9,8 @@ function handleLogout() {
     contacts: [],
     isLoggedIn: false,
     websocketUrl: null,
-    websocketTopics: null
+    websocketTopics: null,
+    servers: []
   });
   // Logout = no presence: disconnect socket so extension doesn't think it's online
   // and doesn't receive calls anymore (JWT remains valid for 3 days)
@@ -57,7 +58,8 @@ export function checkLoginStatusAndStoreContacts(meetlingAddonBaseUrl, callback)
                 contacts: mergedContacts,
                 isLoggedIn: true,
                 websocketUrl: data.websocketUrl,
-                websocketTopics: data.websocketTopics
+                websocketTopics: data.websocketTopics,
+                servers: Array.isArray(data.servers) ? data.servers : []
               }, () => {
                 console.log("✅ Kontakte gespeichert & gemerged.");
                 if (typeof callback === "function") {

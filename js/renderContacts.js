@@ -1,7 +1,8 @@
 export const contactState = {
   selectedContactId: null,
   selectedContactName: null,
-  allContacts: null
+  allContacts: null,
+  canCall: true
 };
 
 
@@ -73,9 +74,10 @@ export function renderContactsList(contacts, skipCache = false) {
       console.log("Kontakt ausgewählt:", contactState.selectedContactName);
 
       const startBtn = document.getElementById("startBtn");
-      startBtn.classList.remove("disabled");
-      startBtn.disabled = false;
-      startBtn.textContent = `${contactState.selectedContactName} anrufen`;
+      // Keep the button disabled when the account has no usable server.
+      startBtn.classList.toggle("disabled", !contactState.canCall);
+      startBtn.disabled = !contactState.canCall;
+      startBtn.textContent = contactState.canCall ? `${contactState.selectedContactName} anrufen` : "Kontakt auswählen";
     });
   });
 }
